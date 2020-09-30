@@ -17,6 +17,8 @@ public class ChildListener implements IZkChildListener {
 	Queue<String> allJobs ;
 	private int childNum;
 	ZkClient zkClient;
+	Process p;
+	static Queue<String> stop;
 	
 	public ChildListener(Queue newJobs,Queue jobsDone,Queue<String> vacantWorker,Queue<String> busyWorker,ZkClient zkClient) {
 		this.newJobs = newJobs;
@@ -26,6 +28,17 @@ public class ChildListener implements IZkChildListener {
 		this.childNum = 1;
 		this.zkClient = zkClient;
 		this.allJobs = new LinkedList<String>();
+	}
+	public ChildListener(Process p,Queue<String> stop, Queue newJobs,Queue jobsDone,Queue<String> vacantWorker,Queue<String> busyWorker,ZkClient zkClient) {
+		this.newJobs = newJobs;
+		this.jobsDone = jobsDone;
+		this.vacantWorker = vacantWorker;
+		this.busyWorker = busyWorker;
+		this.childNum = 1;
+		this.zkClient = zkClient;
+		this.allJobs = new LinkedList<String>();
+		this.p = p;
+		this.stop = stop;
 	}
 	
 	public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
@@ -39,7 +52,7 @@ public class ChildListener implements IZkChildListener {
 	        			allJobs.add(child);
 	        			zkClient.subscribeDataChanges("/prj/"+child+"-result", new DataListener(zkClient,jobsDone,vacantWorker,busyWorker));
 	        		}
-	        	}else if(child.substring(0,6).equalsIgnoreCase("worker") && !vacantWorker.contains(child)&& !busyWorker.contains(child)) {
+	        	}else if(child.length() >5 && child.substring(0,6).equalsIgnoreCase("worker") && !vacantWorker.contains(child)&& !busyWorker.contains(child)) {
 	        		//System.out.println("here");
 	        		vacantWorker.add(child);
 	        		zkClient.subscribeDataChanges("/prj/"+child, new DataListener(zkClient,jobsDone,vacantWorker,busyWorker));
@@ -48,6 +61,15 @@ public class ChildListener implements IZkChildListener {
 			}
 		}else {
 			childNum = currentChilds.size();
+			if(!currentChilds.contains("master")) {
+				vacantWorker.clear();
+				busyWorker.clear();
+				for(String child : currentChilds){
+					if (child.length() > 5 && child.substring(0,6).equals("worker"))
+						zkClient.delete("/prj/"+child);
+				}
+				stop.add("stop");
+			}
 			
 		}
 			
