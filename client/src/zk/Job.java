@@ -27,7 +27,6 @@ public class Job implements Serializable {
 			y = Math.random();
 			if(x * x + y * y <= 1) 
 				inCircle++;
-			//System.out.println(x +";" + "y"+";"+inCircle);
 		}
 		pi = (double)4*inCircle/points;
 		return pi;

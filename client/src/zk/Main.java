@@ -13,7 +13,7 @@ public class Main {
 	public static void main(String[] args)  throws InterruptedException,IOException{
 		//connect to zookeeper
 		jobAndResult = new LinkedList<String>();
-		String zkAddress = "127.0.0.1" + ":2181";
+		String zkAddress = args[0] + ":2181";
 		zkClient= new ZkClient(zkAddress,1000000);
 		zkClient.setZkSerializer(new MySerializer());
 		System.out.println("in");

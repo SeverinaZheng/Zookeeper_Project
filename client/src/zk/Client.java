@@ -37,22 +37,9 @@ public class Client {
 	
 	public int submitJob (int jobNum) {
 		int[] defaultPara = {10000, 20000, 30000};
-		String strPara = "";
 		zkClient.createPersistent("/prj/job" + jobNum);
 		zkClient.createPersistent("/prj/job" + jobNum +"-result");
 		Job job = new Job(jobNum,defaultPara);
-		/*byte[] bt = null;
-		ByteArrayOutputStream bs = new ByteArrayOutputStream();
-		try{
-			ObjectOutputStream os = new ObjectOutputStream(bs);
-			os.writeObject(job);
-			os.flush();
-			bt = bs.toByteArray();
-			bs.close();
-			os.close();
-		}catch(Exception e){
-		}
-		*/
 		zkClient.writeData("/prj/job"+jobNum, job);
 		zkClient.writeData("/prj/job"+jobNum+"-result", "");
 		//waiting for job1's result
